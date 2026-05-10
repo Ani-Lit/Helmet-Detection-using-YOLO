@@ -1,149 +1,338 @@
-Hugging Face's logo
-Hugging Face
-Models
-Datasets
-Spaces
-Buckets
-new
-Docs
-Pricing
-
-
-Hugging Face is way more fun with friends and colleagues! 🤗 Join an organization
-Spaces:
-AniHug
-/
-Helmet_Detection
-
-
-like
-0
-
-App
-Files
-Community
-Settings
-Helmet_Detection
-/
-app.py
-
-AniHug's picture
-AniHug
-Rename app.py.txt to app.py
-e55d535
-verified
-about 10 hours ago
-raw
-
-Copy download link
-history
-blame
-edit
-delete
-3.23 kB
 import streamlit as st
 import cv2
 import numpy as np
 from ultralytics import YOLO
-import tempfile
-import os
 
-# Page config
-st.set_page_config(page_title="Safety Helmet Detector", layout="wide")
-st.title("🛡️ Safety Helmet & Head Detector")
+# =====================================
+# PAGE CONFIG
+# =====================================
+st.set_page_config(
+    page_title="Helmet Detection AI",
+    page_icon="🪖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
+# =====================================
+# CUSTOM CSS
+# =====================================
 st.markdown("""
-Detects **helmets** and **bare heads** in images using YOLOv8m.
+<style>
 
-**Model Performance:**
-- mAP50: 0.968
-- Trained on: Construction/industrial safety scenarios (bare heads + hard helmets)
-- Classes: Head, Helmet
-""")
+html, body, [class*="css"] {
+    font-family: 'Segoe UI', sans-serif;
+}
 
-# Load model
+.stApp {
+    background: #0f172a;
+    color: white;
+}
+
+.block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 1400px;
+}
+
+section[data-testid="stSidebar"] {
+    background: rgba(15, 23, 42, 0.95);
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.main-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    text-align: center;
+    color: white;
+    margin-bottom: 0.2rem;
+}
+
+.subtitle {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 1.15rem;
+    margin-bottom: 2rem;
+}
+
+.glass {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+
+.metric-card {
+    background: rgba(255,255,255,0.04);
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+}
+
+.metric-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.metric-label {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+img {
+    border-radius: 18px;
+}
+
+hr {
+    border-color: rgba(255,255,255,0.08);
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# =====================================
+# HERO SECTION
+# =====================================
+st.markdown("""
+<div class="main-title">
+🪖 Helmet Detection AI
+</div>
+
+<div class="subtitle">
+Helmet and head detection for industrial safety monitoring
+</div>
+""", unsafe_allow_html=True)
+
+# =====================================
+# MODEL LOADING
+# =====================================
 @st.cache_resource
 def load_model():
-    model = YOLO("best.pt")
-    return model
+    return YOLO("best.pt")
 
 try:
     model = load_model()
-    st.success("✅ Model loaded!")
 except Exception as e:
-    st.error(f"❌ Failed to load model: {e}")
+    st.error(f"Model loading failed: {e}")
     st.stop()
 
-# Sidebar settings
-st.sidebar.header("⚙️ Settings")
-conf_threshold = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.5, 0.05)
-iou_threshold = st.sidebar.slider("IoU Threshold (NMS)", 0.0, 1.0, 0.7, 0.05)
+# =====================================
+# SIDEBAR
+# =====================================
+with st.sidebar:
 
-# Upload image
-st.subheader("📤 Upload Image")
-uploaded_image = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png", "bmp"])
+    st.markdown("## ⚙️ Detection Settings")
 
+    conf_threshold = st.slider(
+        "Confidence Threshold",
+        0.0,
+        1.0,
+        0.50,
+        0.05
+    )
+
+    iou_threshold = st.slider(
+        "IoU Threshold",
+        0.0,
+        1.0,
+        0.45,
+        0.05
+    )
+
+    st.markdown("---")
+
+    st.markdown("## 📊 Model Statistics")
+
+    st.markdown("""
+<div class="glass">
+
+### YOLOv8m
+
+- mAP50: **95.8%**
+- Optimized for industrial environments
+- Classes:
+    - Helmet
+    - Head
+
+</div>
+""", unsafe_allow_html=True)
+
+# =====================================
+# STATUS BAR
+# =====================================
+colA, colB, colC = st.columns(3)
+
+with colA:
+    st.markdown("""
+    <div class="metric-card">
+        <div class="metric-number">95.8%</div>
+        <div class="metric-label">mAP50 Accuracy</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with colB:
+    st.markdown("""
+    <div class="metric-card">
+        <div class="metric-number">YOLOv8m</div>
+        <div class="metric-label">Model Architecture</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with colC:
+    st.markdown("""
+    <div class="metric-card">
+        <div class="metric-number">2</div>
+        <div class="metric-label">Detection Classes</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# =====================================
+# FILE UPLOADER
+# =====================================
+st.markdown("## 📤 Upload Image")
+
+uploaded_image = st.file_uploader(
+    "Drop an image below",
+    type=["jpg", "jpeg", "png", "bmp"]
+)
+
+# =====================================
+# INFERENCE
+# =====================================
 if uploaded_image is not None:
-    # Read image
-    file_bytes = np.asarray(bytearray(uploaded_image.read()), dtype=np.uint8)
+
+    file_bytes = np.asarray(
+        bytearray(uploaded_image.read()),
+        dtype=np.uint8
+    )
+
     image = cv2.imdecode(file_bytes, 1)
+
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
-    # Run inference
-    with st.spinner("🔍 Detecting..."):
-        results = model(image_rgb, conf=conf_threshold, iou=iou_threshold)
-    
-    # Draw results
-    annotated_image = results[0].plot()[:, :, ::-1]  # BGR to RGB
-    
-    # Display side by side
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image(image_rgb, caption="Original", use_column_width=True)
-    with col2:
-        st.image(annotated_image, caption="Detections", use_column_width=True)
-    
-    # Show statistics
-    st.subheader("📊 Results")
+
+    with st.spinner("🔍 Running AI Detection..."):
+
+        results = model(
+            image_rgb,
+            conf=conf_threshold,
+            iou=iou_threshold
+        )
+
+    annotated_image = results[0].plot()
+
+    annotated_image = cv2.cvtColor(
+        annotated_image,
+        cv2.COLOR_BGR2RGB
+    )
+
+    st.markdown("## 📷 Detection Results")
+
+    left, right = st.columns(2)
+
+    with left:
+        st.markdown("### Original Image")
+        st.image(image_rgb, use_column_width=True)
+
+    with right:
+        st.markdown("### AI Detection")
+        st.image(annotated_image, use_column_width=True)
+
     detections = results[0].boxes
-    
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =====================================
+    # RESULTS CARDS
+    # =====================================
+    total_helmets = 0
+    total_heads = 0
+
+    for box in detections:
+
+        cls_id = int(box.cls)
+        cls_name = results[0].names[cls_id]
+
+        if cls_name.lower() == "helmet":
+            total_helmets += 1
+        else:
+            total_heads += 1
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-number">{len(detections)}</div>
+            <div class="metric-label">Total Detections</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-number">{total_helmets}</div>
+            <div class="metric-label">Helmets</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-number">{total_heads}</div>
+            <div class="metric-label">No Helmet</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =====================================
+    # DETAILED TABLE
+    # =====================================
     if len(detections) > 0:
-        class_counts = {}
-        for box in detections:
-            cls_id = int(box.cls)
-            cls_name = results[0].names[cls_id]
-            class_counts[cls_name] = class_counts.get(cls_name, 0) + 1
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("**Objects Detected:**")
-            for cls_name, count in class_counts.items():
-                st.write(f"- {cls_name}: {count}")
-        
-        with col2:
-            st.write(f"**Total:** {len(detections)}")
-        
-        # Detailed table
+
+        st.markdown("## 📋 Detection Table")
+
         detection_data = []
+
         for i, box in enumerate(detections):
+
             cls_id = int(box.cls)
             cls_name = results[0].names[cls_id]
+
+            if cls_name.lower() == "head":
+                cls_name = "No Helmet"
+
             conf = box.conf.item()
+
             detection_data.append({
                 "ID": i + 1,
                 "Class": cls_name,
-                "Confidence": f"{conf:.3f}",
+                "Confidence": f"{conf:.2f}"
             })
-        st.dataframe(detection_data, use_container_width=True)
+
+        st.dataframe(
+            detection_data,
+            use_container_width=True,
+            hide_index=True
+        )
+
     else:
-        st.warning("⚠️ No objects detected.")
+        st.warning("⚠️ No objects detected")
 
-st.markdown("---")
+# =====================================
+# FOOTER
+# =====================================
+st.markdown("<br><hr>", unsafe_allow_html=True)
+
 st.markdown("""
-**Model Info:**
-- Architecture: YOLOv8m
-- mAP50: 0.968
-- Training data: Bare heads + hard helmets (construction/industrial)
+<div style='text-align:center; color:#94a3b8;'>
 
-Made with ❤️ using Streamlit + YOLOv8
-""")
+Built using Streamlit and YOLOv8
+
+</div>
+""", unsafe_allow_html=True)
