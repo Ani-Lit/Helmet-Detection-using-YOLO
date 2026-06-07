@@ -32,10 +32,10 @@ Upload any image and the model will detect:
 | Head (mAP50) | 0.953 |
 | Precision | 0.946 |
 | Recall | 0.930 |
-| Training Time | 1.27 hours |
+| Training Time | 5.27 hours |
 | Hardware | Dual Kaggle T4 GPUs |
 
-> Trained on 5,000+ annotated instances across train/valid/test splits.
+> Trained on 25,000+ annotated instances across train/valid/test splits.
 
 ---
 
